@@ -5,7 +5,7 @@ import datetime as dt
 import time as t
 
 
-def write_to_sheet1(row_index, gameroundName, date, time, ilkyari_skor, mac_skor, full_time_win, home_team_name, away_team_name, workbook, sheet):
+def write_to_sheet1(row_index, gameroundName, date, time, ilkyari_skor, mac_skor, full_time_win, home_team_name, away_team_name, listno, workbook, sheet):
 
     bold_format = workbook.add_format({'bold': True})
     center_format = workbook.add_format({'align': 'center'})
@@ -22,13 +22,14 @@ def write_to_sheet1(row_index, gameroundName, date, time, ilkyari_skor, mac_skor
         'F': 10,
         'G': 27.25,
         'H': 27.25,
+        'I': 10,
     }
 
     for column, width in column_widths.items():
         sheet.set_column(column + ':' + column, width)
 
     sheet.set_row(0, None, bg_color_format)
-    sheet.set_column('A:H', None, bold_format)
+    sheet.set_column('A:I', None, bold_format)
     sheet.set_row(0, None, center_format)
 
     # A sütunu için ayrıca genişlik ayarı yap
@@ -42,6 +43,7 @@ def write_to_sheet1(row_index, gameroundName, date, time, ilkyari_skor, mac_skor
     sheet.write('F1', 'Toto', title_format)
     sheet.write('G1', 'Ev Sahibi', title_format)
     sheet.write('H1', 'Deplasman', title_format)
+    sheet.write('I1', 'Sıralama', title_format)
 
     sheet.write(row_index, 0, gameroundName or "-", center_bold_format)
     sheet.write(row_index, 1, date or "-", center_bold_format)
@@ -51,8 +53,9 @@ def write_to_sheet1(row_index, gameroundName, date, time, ilkyari_skor, mac_skor
     sheet.write(row_index, 5, full_time_win, center_bold_format)
     sheet.write(row_index, 6, home_team_name or "-", center_bold_format)
     sheet.write(row_index, 7, away_team_name or "-", center_bold_format)
+    sheet.write(row_index, 8, listno or "-", center_bold_format)
 
-    sheet.autofilter('A1:H1')
+    sheet.autofilter('A1:I1')
 
     return row_index + 1
 
@@ -136,7 +139,7 @@ def main():
 (2) Tüm Sezona Ait Sportoto Sonuçlarını Çek ve Excele Atkar.\n >>> ''')
     
     if menu == "1":
-        URL_CHECK_ID = int(input("Hangi Haftanın Sonucunu Çekmek İstiyorsunuz? : "))
+        URL_CHECK_ID = int(input("Hangi Haftanın Sonucunu Çekmek İstiyorsunuz? start = 300 : "))
         id_check = 1
     else:
         URL_CHECK_ID = 300 # başlangıç haftası
@@ -168,6 +171,8 @@ def main():
 
                     gameroundName = response['object'][0]['gameRoundName']
 
+                    listno = 0
+                    
                     for match in matches:
 
                         match_details = match['match']
@@ -195,8 +200,8 @@ def main():
 
                         ilkyari_skor = "-".join([str(home_halftime_score), str(away_halftime_score)])
                         mac_skor = "-".join([str(home_fulltime_score), str(away_fulltime_score)])
-
-                        result = f"{gameroundName} | {date} | {time} | {ilkyari_skor} | {mac_skor} | {full_time_win} | {home_team_name} - {away_team_name}"
+                        listno +=1
+                        result = f"| {listno} | {gameroundName} | {date} | {time} | {ilkyari_skor} | {mac_skor} | {full_time_win} | {home_team_name} - {away_team_name}"
 
                         print(result)
 
@@ -209,12 +214,14 @@ def main():
                             mac_skor,
                             full_time_win,
                             home_team_name,
-                            away_team_name, 
+                            away_team_name,
+                            listno,
                             workbook,
                             sheet
                         )
 
-
+                    
+                    
                 params = {
                     "id": URL_CHECK_ID
                 }
